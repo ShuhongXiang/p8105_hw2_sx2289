@@ -71,6 +71,157 @@ left_join(precip_df, month_df, by = "month")
 ```
 This dataset contains information from the Mr. Trashwheel trash collector in Baltimore, Maryland. AS trash enters the inner harbor, the trashwheel collects that trash, and stores it in a dumpster. The dataset contains information on year ,month, and trash collected, include some specific kinds of trash. There are a total of `r nrow(trashwheel_df)` rows in our final dataset. Additional data sheets include monthly precipitation data.
 
+## Problem 2
 
+Read teh NYC transit dataset:
+
+Retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance.
+
+```{r}
+nyctransit_df = 
+  read_csv("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+       col_types = cols(
+         Line = col_character(),
+         `Station Name` = col_character(),
+         `Station Latitude` = col_double(),
+         `Station Longitude` = col_double(),
+        `Station Longitude`  = col_character(),
+         Route2 = col_character(),
+         Route3 = col_character(),
+         Route4 = col_character(),
+         Route5 = col_character(),
+         Route6 = col_character(),
+         Route7 = col_character(),
+         Route8 = col_character(),
+         Route9 = col_character(),
+         Route10 = col_character(),
+         Route11 = col_character(),
+         Entry = col_character(),
+         Vending = col_character(),
+         `Entrance Type` = col_character(),
+         ADA = col_character()
+        ) 
+       
+           )
+
+drop_na(nyctransit_df,Route1, Route2, Route3, Route4, Route5, Route6, Route7, Route8, Route9, Route10, Route11)
+
+nyctransit_data <-
+  select(nyctransit_df, Line, `Station Name`, `Station Latitude`, `Station Longitude` , Route1, Route2, Route3, Route4, Route5, Route6, Route7, Route8, Route9, Route10, Route11, Entry, Vending, `Entrance Type`, ADA)
+
+```
+Convert the entry variable from character (YES vs NO) to a logical variable:
+
+```{r}
+recode(nyctransit_data$Entry, "YES" = TRUE, "NO" = FALSE)
+```
+
+This dataset contains information from the NYC subway transition situation. Every passenger are recorded mutiple variables. In this dataset, we focus on Line, Station Name, Station Latitude, Station Longitude, Route1, Route2, Route3, Route4, Route5, Route6, Route7, Route8, Route9, Route10, Route11, Entry, Vending, Entrance Type, and ADA compliance. There are a total of `r nrow(nyctransit_data)` rows x `r ncol(nyctransit_data)` columns in our final dataset. The data on the routes is not tidy, the values are discrete.
+
+
+Answer the following questions using these data:
+
+How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St A/B/C/D; 125st 1; 125st 4/5); the distinct function may be useful here.
+```{r}
+nyctransit_df %>% distinct(`Station Name`)
+```
+
+How many stations are ADA compliant?
+```{r}
+nyctransit_df %>% distinct(`Station Name`, ADA = TRUE)
+```
+
+What proportion of station entrances / exits without vending allow entrance?
+```{r}
+number_entry_novending <- nrow(filter(nyctransit_data, Entry == "YES", Vending == "NO"))
+
+number_entry <- nrow(filter(nyctransit_data, Entry == "YES"))
+
+proportions_entry_novending <- (number_entry_novending/number_entry)
+
+view(proportions_entry_novending)
+
+```
+Reformat data so that route number and route name are distinct variables. 
+```{r}
+
+
+```
+
+How many distinct stations serve the A train?
+```{r}
+
+```
+
+
+Of the stations that serve the A train, how many are ADA compliant?
+```{r}
+
+```
+
+
+
+## Problem 3
+
+
+Clean the data in pols-month.csv.   
+```{r}
+pols_month_df = 
+  read_csv("./data/pols-month.csv",
+       col_types = "ciiiiiiii") %>%
+  janitor::clean_names()
+```
+Use separate() to break up the variable mon into integer variables year, month, and day.replace month number with month name
+
+```{r}
+
+tibble(
+    month = 1:12,
+    month.name = month.name
+  )
+
+separate(pols_month_df, mon, into = c("year", "month", "day"))
+```
+
+create a president variable taking values gop and dem, and remove prez_dem and prez_gop; and remove the day variable.
+
+```{r}
+gop <- bind_cols(pols_month_df$gov_gop, pols_month_df$sen_gop, pols_month_df$rep_gop)
+
+dem <- bind_cols(pols_month_df$gov_dem, pols_month_df$sen_dem, pols_month_df$rep_dem)
+
+president <- data_frame(x= gop, dem)
+```
+
+
+clean the data in snp.csv using a similar process to the above. For consistency across datasets, arrange according to year and month, and organize so that year and month are the leading columns.
+
+```{r}
+snp_df = 
+  read_csv("./data/snp.csv",
+       col_types = "cd") %>%
+  janitor::clean_names()
+```
+
+```{r}
+separate(snp_df, date, into = c("year", "month", "day"))
+```
+Tidy the unemployment data so that it can be merged with the previous datasets. This process will involve switching from “wide” to “long” format; ensuring that key variables have the same name; and ensuring that key variables take the same values.
+
+```{r}
+unemployment_df = 
+  read_csv("./data/unemployment.csv",
+       col_types = "idddddddddddd") %>%
+  janitor::clean_names()
+```
+
+Join the datasets by merging snp into pols, and merging unemployment into the result.
+
+```{r}
+Merging_data <- vctrs::vec_c(pols_month_df, snp_df, unemployment_df)
+
+view(Merging_data)
+```
+This dataset contains information from the NYC subway transition situation. Every passenger are recorded mutiple variables. In this dataset, we focus on Line, Station Name, Station Latitude, Station Longitude, Route1, Route2, Route3, Route4, Route5, Route6, Route7, Route8, Route9, Route10, Route11, Entry, Vending, Entrance Type, and ADA compliance. There are a total of `r nrow(nyctransit_data)` rows x `r ncol(nyctransit_data)` columns in our final dataset. The data on the routes is not tidy, the values are discrete.
 
 
